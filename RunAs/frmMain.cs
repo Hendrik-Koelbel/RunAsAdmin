@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Security.Principal;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace RunAs
         {
             InitializeComponent();
             labelCurrentUser.Text = String.Format("Current user: {0}", Environment.UserName + " - " + WindowsIdentity.GetCurrent().Name);
+
             if (File.Exists(credentialsPath))
             {
                 try
