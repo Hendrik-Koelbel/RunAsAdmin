@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -121,16 +122,25 @@ namespace RunAs
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
                 path = fileDialog.FileName;
-                Process p = new Process();
-                ProcessStartInfo ps = new ProcessStartInfo();
-                ps.Domain = domain;
-                ps.UserName = username;
-                ps.Password = GetSecureString(password);
-                ps.FileName = path;
-                ps.LoadUserProfile = true;
-                ps.UseShellExecute = false;
-                p.StartInfo = ps;
-                p.Start();
+
+                Task.Factory.StartNew(() =>
+                {
+                    using (LogonUser(domain, username, password, LogonType.Service))
+                    {
+                        //Process p = new Process();
+                        //ProcessStartInfo ps = new ProcessStartInfo();
+                        //ps.Arguments = "runas";
+                        //ps.Domain = domain;
+                        //ps.UserName = username;
+                        //ps.Password = GetSecureString(password);
+                        //ps.FileName = path;
+                        //ps.LoadUserProfile = true;
+                        //ps.UseShellExecute = false;
+                        //p.StartInfo = ps;
+                        //p.Start();
+                        UACHelper.UACHelper.StartElevated(new ProcessStartInfo(path));
+                    }
+                });
             }
             else
             {
