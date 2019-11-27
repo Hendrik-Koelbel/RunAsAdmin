@@ -1,9 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -23,8 +24,20 @@ namespace RunAs
         public frmMain()
         {
             InitializeComponent();
-            labelCurrentUser.Text = String.Format("Current user: {0}", Environment.UserName + " - " + WindowsIdentity.GetCurrent().Name);
-
+            labelCurrentUser.Text = String.Format("Current user: {0} " +
+                "\nDefault Behavior: {1} " +
+                "\nIs Elevated: {2}" +
+                "\nIs Administrator: {3}" +
+                "\nIs Desktop Owner: {4}" +
+                "\nProcess Owner: {5}" +
+                "\nDesktop Owner: {6}", 
+                Environment.UserName + " - " + WindowsIdentity.GetCurrent().Name,
+                UACHelper.UACHelper.GetExpectedRunLevel(Assembly.GetExecutingAssembly().Location).ToString(),
+                UACHelper.UACHelper.IsElevated.ToString(),
+                UACHelper.UACHelper.IsAdministrator.ToString(),
+                UACHelper.UACHelper.IsDesktopOwner.ToString(),
+                WindowsIdentity.GetCurrent().Name ?? "SYSTEM",
+                UACHelper.UACHelper.DesktopOwner.ToString());
             if (File.Exists(credentialsPath))
             {
                 try
@@ -48,21 +61,28 @@ namespace RunAs
             if (!UACHelper.UACHelper.IsElevated)
             {
                 buttonRestartWithAdminRights.Enabled = false;
-                //WinForm.ShieldifyButton(buttonRestartWithAdminRights);
             }
-            if (Environment.UserName == "Clientadmin" || Environment.UserName == "clientadmin")
-            {
-                buttonStart.Enabled = false;
-                textBoxDomain.Enabled = false;
-                textBoxUsername.Enabled = false;
-                textBoxPassword.Enabled = false;
-                buttonRestartWithAdminRights.Enabled = true;
-            }
+            //if (UACHelper.UACHelper.IsAdministrator)
+            //{
+            //    buttonStart.Enabled = false;
+            //    textBoxDomain.Enabled = false;
+            //    textBoxUsername.Enabled = false;
+            //    textBoxPassword.Enabled = false;
+            //    buttonRestartWithAdminRights.Enabled = true;
+            //}
+            //else
+            //{
+            //    UACHelper.WinForm.ShieldifyButton(buttonRestartWithAdminRights);
+            //}
+
+            Helper.SetForegroundWindow(Handle.ToInt32());
         }
+
+
         // Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments)
+
         public string credentialsPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments) + @"\Credentials.json";
-        public string executablePath = Application.StartupPath; // or Assembly.GetAssembly(typeof(MyAssemblyType)).Location
-        public string executableFile = Assembly.GetExecutingAssembly().Location; // or Assembly.GetAssembly(typeof(MyAssemblyType)).Location
+        public string executableFile = Assembly.GetExecutingAssembly().Location;
         public string username;
         public string password;
         public string domain;
@@ -90,35 +110,21 @@ namespace RunAs
                 username = getCredentials.SelectToken("username").ToString();
                 password = ss.Decrypt(getCredentials.SelectToken("password").ToString());
 
-                //Task.Factory.StartNew(() =>
-                //{
+
                 using (LogonUser(domain, username, password, LogonType.Service))
                 {
-                    
-                    //UACHelper.UACHelper.StartElevated(new ProcessStartInfo(path)); // not working 
-
-                    //---------------------------
-                    //---------------------------
-                    //Der Verzeichnisname ist ungültig
-                    //   bei System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
-
-                    //   bei System.Diagnostics.Process.Start()
-
-                    //   bei RunAs.frmMain.buttonStart_Click(Object sender, EventArgs e)
-                    //System
-
-                    //System.Collections.ListDictionaryInternal
-                    //-------------------------- -
-                    //OK
-                    //-------------------------- -
                     using (WindowsIdentity.GetCurrent().Impersonate())
                     {
+                        if (String.IsNullOrWhiteSpace(textBoxDomain.Text) && String.IsNullOrWhiteSpace(textBoxUsername.Text) && String.IsNullOrWhiteSpace(textBoxPassword.Text))
+                        {
+                            throw new ArgumentNullException();
+                        }
+
                         Process p = new Process();
 
                         ProcessStartInfo ps = new ProcessStartInfo();
 
-                        ps.FileName = executablePath; // Fehler
-                                                                                               //ps.WorkingDirectory = executablePath; // Fehler
+                        ps.FileName = executableFile; 
                         ps.Domain = domain;
                         ps.UserName = username;
                         ps.Password = GetSecureString(password);
@@ -130,52 +136,65 @@ namespace RunAs
                             Application.Exit();
                         }
                     }
-                    
                 }
-                //});
+
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message + "\n" + ex.StackTrace + "\n" + ex.Source + "\n" + ex.InnerException + "\n" + ex.Data);
+                MessageBox.Show("Message: \n" + ex.Message + "\n\n" + "Source: \n" + ex.Source + "\n\n" + "Stack: \n" + ex.StackTrace + "\n\n" + "Data: \n" + ex.Data + "\n\n" + "InnerException: \n" + ex.InnerException, ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                //MessageBox.Show("", ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                this.UseWaitCursor = false;
+                buttonStart.Enabled = true;
+                textBoxDomain.Enabled = true;
+                textBoxUsername.Enabled = true;
+                textBoxPassword.Enabled = true;
             }
         }
 
         private void buttonRestartWithAdminRights_Click(object sender, EventArgs e)
         {
 
-            JObject getCredentials = JObject.Parse(File.ReadAllText(credentialsPath));
-            domain = getCredentials.SelectToken("domain").ToString();
-            username = getCredentials.SelectToken("username").ToString();
-            password = ss.Decrypt(getCredentials.SelectToken("password").ToString());
-
-            string path = string.Empty;
-
-            OpenFileDialog fileDialog = new OpenFileDialog();
-            fileDialog.Filter = "Application (*.exe)|*.exe";
-            if (fileDialog.ShowDialog() == DialogResult.OK)
+            try
             {
-                path = fileDialog.FileName;
+                JObject getCredentials = JObject.Parse(File.ReadAllText(credentialsPath));
+                domain = getCredentials.SelectToken("domain").ToString();
+                username = getCredentials.SelectToken("username").ToString();
+                password = ss.Decrypt(getCredentials.SelectToken("password").ToString());
 
-                Task.Factory.StartNew(() =>
+                string path = string.Empty;
+
+                OpenFileDialog fileDialog = new OpenFileDialog();
+                fileDialog.Filter = "Application (*.exe)|*.exe";
+                if (fileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    using (LogonUser(domain, username, password, LogonType.Service))
+                    path = fileDialog.FileName;
+
+                    Task.Factory.StartNew(() =>
                     {
-                        //Process p = new Process();
-                        //ProcessStartInfo ps = new ProcessStartInfo();
-                        //ps.Arguments = "runas";
-                        //ps.Domain = domain;
-                        //ps.UserName = username;
-                        //ps.Password = GetSecureString(password);
-                        //ps.FileName = path;
-                        //ps.LoadUserProfile = true;
-                        //ps.UseShellExecute = false;
-                        //p.StartInfo = ps;
-                        //p.Start();
-                        UACHelper.UACHelper.StartElevated(new ProcessStartInfo(path));
-                    }
-                });
+                        using (LogonUser(domain, username, password, LogonType.Service))
+                        {
+                            //Process p = new Process();
+                            //ProcessStartInfo ps = new ProcessStartInfo();
+                            //ps.Arguments = "runas";
+                            //ps.Domain = domain;
+                            //ps.UserName = username;
+                            //ps.Password = GetSecureString(password);
+                            //ps.FileName = path;
+                            //ps.LoadUserProfile = true;
+                            //ps.UseShellExecute = false;
+                            //p.StartInfo = ps;
+                            //p.Start();
+                            UACHelper.UACHelper.StartElevated(new ProcessStartInfo(path));
+                        }
+                    });
+                }
+                else
+                {
+
+                }
             }
-            else
+            catch (Exception)
             {
 
             }
