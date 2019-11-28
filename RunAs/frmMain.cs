@@ -26,11 +26,11 @@ namespace RunAs
         public frmMain()
         {
             InitializeComponent();
-            TextBoxCustomSource(textBoxDomain, GetAllDomains().ToArray());
-            TextboxPlaceholder(textBoxDomain, "Domain");
-            //TextBoxCustomSource(textBoxUsername, GetAllDomains().ToArray());
-            TextboxPlaceholder(textBoxUsername, "Username");
-            TextboxPlaceholder(textBoxPassword, "Password");
+            SetDataSource(comboBoxDomain, GetAllDomains().ToArray());
+            Placeholder(comboBoxDomain, "Domain");
+            //SetDataSource(textBoxUsername, GetAllDomains().ToArray());
+            Placeholder(comboBoxUsername, "Username");
+            Placeholder(textBoxPassword, "Password");
             //buttonStart.Focus();
             labelCurrentUser.Text = String.Format("Current user: {0} " +
                 "\nDefault Behavior: {1} " +
@@ -51,14 +51,14 @@ namespace RunAs
                 try
                 {
                     JObject getCredentials = JObject.Parse(File.ReadAllText(credentialsPath));
-                    textBoxDomain.Text = getCredentials.SelectToken("domain").ToString();
-                    textBoxUsername.Text = getCredentials.SelectToken("username").ToString();
+                    comboBoxDomain.Text = getCredentials.SelectToken("domain").ToString();
+                    comboBoxUsername.Text = getCredentials.SelectToken("username").ToString();
                     textBoxPassword.Text = ss.Decrypt(getCredentials.SelectToken("password").ToString());
                 }
                 catch (Exception)
                 {
-                    textBoxDomain.Text = String.Empty;
-                    textBoxUsername.Text = String.Empty;
+                    comboBoxDomain.Text = String.Empty;
+                    comboBoxUsername.Text = String.Empty;
                     textBoxPassword.Text = String.Empty;
                     if (File.Exists(credentialsPath))
                     {
@@ -98,14 +98,14 @@ namespace RunAs
             {
                 this.UseWaitCursor = true;
                 buttonStart.Enabled = false;
-                textBoxDomain.Enabled = false;
-                textBoxUsername.Enabled = false;
+                comboBoxDomain.Enabled = false;
+                comboBoxUsername.Enabled = false;
                 textBoxPassword.Enabled = false;
 
 
                 JObject setCredentials = new JObject(
-                    new JProperty("domain", textBoxDomain.Text),
-                    new JProperty("username", textBoxUsername.Text),
+                    new JProperty("domain", comboBoxDomain.Text),
+                    new JProperty("username", comboBoxUsername.Text),
                     new JProperty("password", ss.Encrypt(textBoxPassword.Text)));
 
                 File.WriteAllText(credentialsPath, setCredentials.ToString());
@@ -119,7 +119,7 @@ namespace RunAs
                 {
                     using (WindowsIdentity.GetCurrent().Impersonate())
                     {
-                        if (String.IsNullOrWhiteSpace(textBoxDomain.Text) || String.IsNullOrWhiteSpace(textBoxUsername.Text) || String.IsNullOrWhiteSpace(textBoxPassword.Text))
+                        if (String.IsNullOrWhiteSpace(comboBoxDomain.Text) || String.IsNullOrWhiteSpace(comboBoxUsername.Text) || String.IsNullOrWhiteSpace(textBoxPassword.Text))
                         {
                             throw new ArgumentNullException();
                         }
@@ -147,16 +147,17 @@ namespace RunAs
             }
             catch (ArgumentNullException nullex)
             {
-                var values = new List<string>();
-                foreach (TextBox tb in this.Controls.OfType<TextBox>())
+                var emptyControl = new List<string>();
+                var controls = new List<Control> { comboBoxDomain, comboBoxUsername, textBoxPassword};
+                foreach (Control control in controls)
                 {
-                    if (String.IsNullOrEmpty(tb.Text.Trim()))
+                    if (String.IsNullOrEmpty(control.Text.Trim()))
                     {
-                        values.Add(tb.Text);
+                        emptyControl.Add(control.GetType().Name);
                     }
                     
                 }
-                MessageBox.Show(nullex.Message + "\n" + values, nullex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(String.Format("{0}\n\n{1}", nullex.Message ,string.Join(", ", emptyControl)), nullex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Win32Exception win32ex)
             {
@@ -171,8 +172,8 @@ namespace RunAs
             {
                 this.UseWaitCursor = false;
                 buttonStart.Enabled = true;
-                textBoxDomain.Enabled = true;
-                textBoxUsername.Enabled = true;
+                comboBoxDomain.Enabled = true;
+                comboBoxUsername.Enabled = true;
                 textBoxPassword.Enabled = true;
             }
         }
