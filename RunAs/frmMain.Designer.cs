@@ -82,26 +82,35 @@
             // textBoxDomain
             // 
             this.textBoxDomain.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxDomain.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.textBoxDomain.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBoxDomain.Location = new System.Drawing.Point(119, 19);
             this.textBoxDomain.Name = "textBoxDomain";
             this.textBoxDomain.Size = new System.Drawing.Size(177, 20);
             this.textBoxDomain.TabIndex = 1;
+            this.textBoxDomain.Tag = "";
             // 
             // textBoxUsername
             // 
             this.textBoxUsername.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxUsername.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.textBoxUsername.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBoxUsername.Location = new System.Drawing.Point(119, 45);
             this.textBoxUsername.Name = "textBoxUsername";
             this.textBoxUsername.Size = new System.Drawing.Size(177, 20);
             this.textBoxUsername.TabIndex = 2;
+            this.textBoxUsername.Tag = "";
             // 
             // textBoxPassword
             // 
             this.textBoxPassword.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxPassword.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.textBoxPassword.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBoxPassword.Location = new System.Drawing.Point(119, 71);
             this.textBoxPassword.Name = "textBoxPassword";
             this.textBoxPassword.Size = new System.Drawing.Size(177, 20);
             this.textBoxPassword.TabIndex = 3;
+            this.textBoxPassword.Tag = "";
             this.textBoxPassword.UseSystemPasswordChar = true;
             // 
             // labelDomain

@@ -1,14 +1,16 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static RunAs.Impersonation;
+using static RunAs.Helper;
 
 namespace RunAs
 {
@@ -24,13 +26,19 @@ namespace RunAs
         public frmMain()
         {
             InitializeComponent();
+            TextBoxCustomSource(textBoxDomain, GetAllDomains().ToArray());
+            TextboxPlaceholder(textBoxDomain, "Domain");
+            //TextBoxCustomSource(textBoxUsername, GetAllDomains().ToArray());
+            TextboxPlaceholder(textBoxUsername, "Username");
+            TextboxPlaceholder(textBoxPassword, "Password");
+            //buttonStart.Focus();
             labelCurrentUser.Text = String.Format("Current user: {0} " +
                 "\nDefault Behavior: {1} " +
                 "\nIs Elevated: {2}" +
                 "\nIs Administrator: {3}" +
                 "\nIs Desktop Owner: {4}" +
                 "\nProcess Owner: {5}" +
-                "\nDesktop Owner: {6}", 
+                "\nDesktop Owner: {6}",
                 Environment.UserName + " - " + WindowsIdentity.GetCurrent().Name,
                 UACHelper.UACHelper.GetExpectedRunLevel(Assembly.GetExecutingAssembly().Location).ToString(),
                 UACHelper.UACHelper.IsElevated.ToString(),
@@ -75,11 +83,8 @@ namespace RunAs
             //    UACHelper.WinForm.ShieldifyButton(buttonRestartWithAdminRights);
             //}
 
-            Helper.SetForegroundWindow(Handle.ToInt32());
+            SetForegroundWindow(Handle.ToInt32());
         }
-
-
-        // Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments)
 
         public string credentialsPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments) + @"\Credentials.json";
         public string executableFile = Assembly.GetExecutingAssembly().Location;
@@ -110,12 +115,11 @@ namespace RunAs
                 username = getCredentials.SelectToken("username").ToString();
                 password = ss.Decrypt(getCredentials.SelectToken("password").ToString());
 
-
                 using (LogonUser(domain, username, password, LogonType.Service))
                 {
                     using (WindowsIdentity.GetCurrent().Impersonate())
                     {
-                        if (String.IsNullOrWhiteSpace(textBoxDomain.Text) && String.IsNullOrWhiteSpace(textBoxUsername.Text) && String.IsNullOrWhiteSpace(textBoxPassword.Text))
+                        if (String.IsNullOrWhiteSpace(textBoxDomain.Text) || String.IsNullOrWhiteSpace(textBoxUsername.Text) || String.IsNullOrWhiteSpace(textBoxPassword.Text))
                         {
                             throw new ArgumentNullException();
                         }
@@ -124,12 +128,14 @@ namespace RunAs
 
                         ProcessStartInfo ps = new ProcessStartInfo();
 
-                        ps.FileName = executableFile; 
+                        ps.FileName = executableFile;
                         ps.Domain = domain;
                         ps.UserName = username;
                         ps.Password = GetSecureString(password);
                         ps.LoadUserProfile = true;
+                        ps.CreateNoWindow = true;
                         ps.UseShellExecute = false;
+
                         p.StartInfo = ps;
                         if (p.Start())
                         {
@@ -139,11 +145,30 @@ namespace RunAs
                 }
 
             }
+            catch (ArgumentNullException nullex)
+            {
+                var values = new List<string>();
+                foreach (TextBox tb in this.Controls.OfType<TextBox>())
+                {
+                    if (String.IsNullOrEmpty(tb.Text.Trim()))
+                    {
+                        values.Add(tb.Text);
+                    }
+                    
+                }
+                MessageBox.Show(nullex.Message + "\n" + values, nullex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Win32Exception win32ex)
+            {
+                MessageBox.Show(win32ex.Message, win32ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
             catch (Exception ex)
             {
-                MessageBox.Show("Message: \n" + ex.Message + "\n\n" + "Source: \n" + ex.Source + "\n\n" + "Stack: \n" + ex.StackTrace + "\n\n" + "Data: \n" + ex.Data + "\n\n" + "InnerException: \n" + ex.InnerException, ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                //MessageBox.Show("", ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+                MessageBox.Show(ex.GetHashCode().ToString() + "\n\n" + ex.HResult + "\n\n" + "Message: \n" + ex.Message + "\n\n" + "Source: \n" + ex.Source + "\n\n" + "Stack: \n" + ex.StackTrace + "\n\n" + "Data: \n" + ex.Data + "\n\n" + "InnerException: \n" + ex.InnerException, ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
                 this.UseWaitCursor = false;
                 buttonStart.Enabled = true;
                 textBoxDomain.Enabled = true;
