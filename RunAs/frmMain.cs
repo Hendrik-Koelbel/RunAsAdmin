@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static RunAs.Impersonation;
 using static RunAs.Helper;
+using static RunAs.Impersonation;
 
 namespace RunAs
 {
@@ -27,25 +26,25 @@ namespace RunAs
         {
             InitializeComponent();
             SetDataSource(comboBoxDomain, GetAllDomains().ToArray());
+            SetDataSource(comboBoxUsername, GetAllUsers().ToArray());
             Placeholder(comboBoxDomain, "Domain");
-            //SetDataSource(textBoxUsername, GetAllDomains().ToArray());
             Placeholder(comboBoxUsername, "Username");
             Placeholder(textBoxPassword, "Password");
-            //buttonStart.Focus();
             labelCurrentUser.Text = String.Format("Current user: {0} " +
-                "\nDefault Behavior: {1} " +
-                "\nIs Elevated: {2}" +
-                "\nIs Administrator: {3}" +
-                "\nIs Desktop Owner: {4}" +
-                "\nProcess Owner: {5}" +
-                "\nDesktop Owner: {6}",
-                Environment.UserName + " - " + WindowsIdentity.GetCurrent().Name,
-                UACHelper.UACHelper.GetExpectedRunLevel(Assembly.GetExecutingAssembly().Location).ToString(),
-                UACHelper.UACHelper.IsElevated.ToString(),
-                UACHelper.UACHelper.IsAdministrator.ToString(),
-                UACHelper.UACHelper.IsDesktopOwner.ToString(),
-                WindowsIdentity.GetCurrent().Name ?? "SYSTEM",
-                UACHelper.UACHelper.DesktopOwner.ToString());
+                    "\nDefault Behavior: {1} " +
+                    "\nIs Elevated: {2}" +
+                    "\nIs Administrator: {3}" +
+                    "\nIs Desktop Owner: {4}" +
+                    "\nProcess Owner: {5}" +
+                    "\nDesktop Owner: {6}",
+                    Environment.UserName + " - " + WindowsIdentity.GetCurrent().Name,
+                    UACHelper.UACHelper.GetExpectedRunLevel(Assembly.GetExecutingAssembly().Location).ToString(),
+                    UACHelper.UACHelper.IsElevated.ToString(),
+                    UACHelper.UACHelper.IsAdministrator.ToString(),
+                    UACHelper.UACHelper.IsDesktopOwner.ToString(),
+                    WindowsIdentity.GetCurrent().Name ?? "SYSTEM",
+                    UACHelper.UACHelper.DesktopOwner.ToString());
+
             if (File.Exists(credentialsPath))
             {
                 try
@@ -66,22 +65,19 @@ namespace RunAs
                     }
                 }
             }
-            if (!UACHelper.UACHelper.IsElevated)
-            {
-                buttonRestartWithAdminRights.Enabled = false;
-            }
             //if (UACHelper.UACHelper.IsAdministrator)
             //{
             //    buttonStart.Enabled = false;
-            //    textBoxDomain.Enabled = false;
-            //    textBoxUsername.Enabled = false;
+            //    comboBoxDomain.Enabled = false;
+            //    comboBoxUsername.Enabled = false;
             //    textBoxPassword.Enabled = false;
             //    buttonRestartWithAdminRights.Enabled = true;
             //}
-            //else
-            //{
-            //    UACHelper.WinForm.ShieldifyButton(buttonRestartWithAdminRights);
-            //}
+            if (!UACHelper.UACHelper.IsAdministrator)
+            {
+                buttonRestartWithAdminRights.Enabled = false;
+                UACHelper.WinForm.ShieldifyButton(buttonRestartWithAdminRights);
+            }
 
             SetForegroundWindow(Handle.ToInt32());
         }
@@ -147,17 +143,24 @@ namespace RunAs
             }
             catch (ArgumentNullException nullex)
             {
-                var emptyControl = new List<string>();
-                var controls = new List<Control> { comboBoxDomain, comboBoxUsername, textBoxPassword};
+                var emptyControlsType = new List<string>();
+                var emptyControlsName = new List<string>();
+                var emptyControlsResult = new List<string>();
+                var controls = new List<Control> { comboBoxDomain, comboBoxUsername, textBoxPassword };
                 foreach (Control control in controls)
                 {
                     if (String.IsNullOrEmpty(control.Text.Trim()))
                     {
-                        emptyControl.Add(control.GetType().Name);
+                        string typ = control.GetType().Name.ToLower();
+                        emptyControlsType.Add(UppercaseFirst(typ));
+                        string name = control.Name.ToLower();
+                        string result = name.Replace(typ, "");
+                        emptyControlsName.Add(UppercaseFirst(result));
+                        emptyControlsResult.Add(UppercaseFirst(typ) + ": " + UppercaseFirst(result));
                     }
-                    
+
                 }
-                MessageBox.Show(String.Format("{0}\n\n{1}", nullex.Message ,string.Join(", ", emptyControl)), nullex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(String.Format("{0}\n\n{1}", nullex.Message, string.Join("\n", emptyControlsResult)), nullex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Win32Exception win32ex)
             {
@@ -200,17 +203,6 @@ namespace RunAs
                     {
                         using (LogonUser(domain, username, password, LogonType.Service))
                         {
-                            //Process p = new Process();
-                            //ProcessStartInfo ps = new ProcessStartInfo();
-                            //ps.Arguments = "runas";
-                            //ps.Domain = domain;
-                            //ps.UserName = username;
-                            //ps.Password = GetSecureString(password);
-                            //ps.FileName = path;
-                            //ps.LoadUserProfile = true;
-                            //ps.UseShellExecute = false;
-                            //p.StartInfo = ps;
-                            //p.Start();
                             UACHelper.UACHelper.StartElevated(new ProcessStartInfo(path));
                         }
                     });
