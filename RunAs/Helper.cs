@@ -4,6 +4,7 @@ using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.ActiveDirectory;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -192,6 +193,25 @@ namespace RunAs
             if (string.IsNullOrEmpty(str))
                 return string.Empty;
             return char.ToUpper(str[0]) + str.Substring(1).ToLower();
+        }
+        #endregion
+
+        #region Get users SID
+        public static string GetUsersSID()
+        {
+            // create your domain context
+            PrincipalContext ctx = new PrincipalContext(ContextType.Domain);
+            // find the user
+            UserPrincipal user = UserPrincipal.FindByIdentity(ctx, WindowsIdentity.GetCurrent().Name);
+
+            if (user != null)
+            {
+                var usersSid = user.Sid.ToString();
+                var username = user.DisplayName;
+                var userSamAccountName = user.SamAccountName;
+                return usersSid;
+            }
+            return null;
         }
         #endregion
     }

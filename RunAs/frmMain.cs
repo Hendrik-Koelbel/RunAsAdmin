@@ -83,6 +83,7 @@ namespace RunAs
             }
 
             SetForegroundWindow(Handle.ToInt32());
+
         }
 
         public string credentialsPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments) + @"\Credentials.json";
@@ -113,6 +114,7 @@ namespace RunAs
                 domain = getCredentials.SelectToken("domain").ToString();
                 username = getCredentials.SelectToken("username").ToString();
                 password = ss.Decrypt(getCredentials.SelectToken("password").ToString());
+                MessageBox.Show(GetUsersSID());
 
                 using (LogonUser(domain, username, password, LogonType.Service))
                 {
