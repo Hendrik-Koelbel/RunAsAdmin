@@ -49,7 +49,7 @@
             this.buttonStart.Name = "buttonStart";
             this.buttonStart.Size = new System.Drawing.Size(99, 38);
             this.buttonStart.TabIndex = 4;
-            this.buttonStart.Text = "Get Admin Rights";
+            this.buttonStart.Text = "Restart";
             this.buttonStart.UseVisualStyleBackColor = true;
             this.buttonStart.Click += new System.EventHandler(this.buttonStart_Click);
             // 
@@ -82,14 +82,15 @@
             // textBoxPassword
             // 
             this.textBoxPassword.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxPassword.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.textBoxPassword.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
             this.textBoxPassword.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBoxPassword.Location = new System.Drawing.Point(119, 73);
             this.textBoxPassword.Name = "textBoxPassword";
+            this.textBoxPassword.PasswordChar = '●';
             this.textBoxPassword.Size = new System.Drawing.Size(177, 20);
             this.textBoxPassword.TabIndex = 3;
             this.textBoxPassword.Tag = "";
-            this.textBoxPassword.UseSystemPasswordChar = true;
+            this.textBoxPassword.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxPassword_KeyDown);
             // 
             // labelDomain
             // 

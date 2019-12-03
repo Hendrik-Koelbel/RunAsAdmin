@@ -1,15 +1,17 @@
 ﻿using Newtonsoft.Json.Linq;
+using SimpleImpersonation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Security.AccessControl;
 using System.Security.Principal;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static RunAs.Helper;
-using static RunAs.Impersonation;
 
 namespace RunAs
 {
@@ -92,59 +94,82 @@ namespace RunAs
         public string password;
         public string domain;
 
-        private void buttonStart_Click(object sender, EventArgs e)
+
+        // https://social.msdn.microsoft.com/Forums/vstudio/en-US/2af1d146-0f9c-4760-b8f0-812dace836dc/wait-for-long-running-operation-before-next-operation-without-ui-freeze?forum=wpf
+        // long running operation
+        private async void buttonStart_Click(object sender, EventArgs e)
         {
             try
             {
-                this.UseWaitCursor = true;
-                buttonStart.Enabled = false;
-                comboBoxDomain.Enabled = false;
-                comboBoxUsername.Enabled = false;
-                textBoxPassword.Enabled = false;
+                ControlStateSwitch(true, false, buttonRestartWithAdminRights.Enabled, false, false, false);
 
+                if (String.IsNullOrWhiteSpace(comboBoxDomain.Text) || String.IsNullOrWhiteSpace(comboBoxUsername.Text) || String.IsNullOrWhiteSpace(textBoxPassword.Text))
+                {
+                    throw new ArgumentNullException();
+                }
 
                 JObject setCredentials = new JObject(
                     new JProperty("domain", comboBoxDomain.Text),
                     new JProperty("username", comboBoxUsername.Text),
                     new JProperty("password", ss.Encrypt(textBoxPassword.Text)));
 
-                File.WriteAllText(credentialsPath, setCredentials.ToString());
-
-                JObject getCredentials = JObject.Parse(File.ReadAllText(credentialsPath));
-                domain = getCredentials.SelectToken("domain").ToString();
-                username = getCredentials.SelectToken("username").ToString();
-                password = ss.Decrypt(getCredentials.SelectToken("password").ToString());
-                MessageBox.Show(GetUsersSID());
-
-                using (LogonUser(domain, username, password, LogonType.Service))
+                await Task.Factory.StartNew(() =>
                 {
-                    using (WindowsIdentity.GetCurrent().Impersonate())
+                    File.WriteAllText(credentialsPath, setCredentials.ToString());
+                    JObject getCredentials = JObject.Parse(File.ReadAllText(credentialsPath));
+                    domain = getCredentials.SelectToken("domain").ToString();
+                    username = getCredentials.SelectToken("username").ToString();
+                    password = ss.Decrypt(getCredentials.SelectToken("password").ToString());
+
+                });
+
+                await Task.Factory.StartNew(() =>
+                {
+                    string userPath = GetUserDirectoryPath();
+                    bool hasAccess = false;
+
+                    var credentials = new UserCredentials(domain, username, password);
+                    SimpleImpersonation.Impersonation.RunAsUser(credentials, SimpleImpersonation.LogonType.Interactive, () =>
                     {
-                        if (String.IsNullOrWhiteSpace(comboBoxDomain.Text) || String.IsNullOrWhiteSpace(comboBoxUsername.Text) || String.IsNullOrWhiteSpace(textBoxPassword.Text))
+                        using (WindowsIdentity.GetCurrent().Impersonate())
                         {
-                            throw new ArgumentNullException();
+                            if (HasFolderRights(userPath, FileSystemRights.FullControl, WindowsIdentity.GetCurrent()))
+                            {
+                                hasAccess = true;
+                            }
+                            else
+                            {
+                                hasAccess = false;
+                            }
                         }
+                    });
 
-                        Process p = new Process();
-
-                        ProcessStartInfo ps = new ProcessStartInfo();
-
-                        ps.FileName = executableFile;
-                        ps.Domain = domain;
-                        ps.UserName = username;
-                        ps.Password = GetSecureString(password);
-                        ps.LoadUserProfile = true;
-                        ps.CreateNoWindow = true;
-                        ps.UseShellExecute = false;
-
-                        p.StartInfo = ps;
-                        if (p.Start())
-                        {
-                            Application.Exit();
-                        }
+                    if (!hasAccess)
+                    {
+                        AddDirectorySecurity(userPath, String.Format(@"{0}\{1}", domain, username), FileSystemRights.FullControl, AccessControlType.Allow);
                     }
-                }
+                });
 
+                await Task.Factory.StartNew(() =>
+                {
+                    Process p = new Process();
+
+                    ProcessStartInfo ps = new ProcessStartInfo();
+
+                    ps.FileName = executableFile;
+                    ps.Domain = domain;
+                    ps.UserName = username;
+                    ps.Password = GetSecureString(password);
+                    ps.LoadUserProfile = true;
+                    ps.CreateNoWindow = true;
+                    ps.UseShellExecute = false;
+
+                    p.StartInfo = ps;
+                    if (p.Start())
+                    {
+                        Application.Exit();
+                    }
+                });
             }
             catch (ArgumentNullException nullex)
             {
@@ -169,28 +194,24 @@ namespace RunAs
             }
             catch (Win32Exception win32ex)
             {
-                MessageBox.Show(win32ex.Message, win32ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(win32ex.Message + " Code: " + win32ex.NativeErrorCode, win32ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-
-                MessageBox.Show(ex.GetHashCode().ToString() + "\n\n" + ex.HResult + "\n\n" + "Message: \n" + ex.Message + "\n\n" + "Source: \n" + ex.Source + "\n\n" + "Stack: \n" + ex.StackTrace + "\n\n" + "Data: \n" + ex.Data + "\n\n" + "InnerException: \n" + ex.InnerException, ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Message: \n" + ex.Message + "\n\n" + "Source: \n" + ex.Source + "\n\n" + "Stack: \n" + ex.StackTrace, ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                this.UseWaitCursor = false;
-                buttonStart.Enabled = true;
-                comboBoxDomain.Enabled = true;
-                comboBoxUsername.Enabled = true;
-                textBoxPassword.Enabled = true;
+                ControlStateSwitch(false, true, buttonRestartWithAdminRights.Enabled, true, true, true);
             }
         }
 
         private void buttonRestartWithAdminRights_Click(object sender, EventArgs e)
         {
-
             try
             {
+                ControlStateSwitch(true, false, false, false, false, false);
+
                 JObject getCredentials = JObject.Parse(File.ReadAllText(credentialsPath));
                 domain = getCredentials.SelectToken("domain").ToString();
                 username = getCredentials.SelectToken("username").ToString();
@@ -198,18 +219,40 @@ namespace RunAs
 
                 string path = string.Empty;
 
+                //ConfigureWindowsRegistry();
+                //UpdateGroupPolicy();
+                ///Mapped drives are not available from an elevated prompt 
+                ///when UAC is configured to "Prompt for credentials" in Windows
+                ///https://support.microsoft.com/en-us/help/3035277/mapped-drives-are-not-available-from-an-elevated-prompt-when-uac-is-co#detail%20to%20configure%20the%20registry%20entry
+                ///https://stackoverflow.com/a/25908932/11189474
                 OpenFileDialog fileDialog = new OpenFileDialog();
                 fileDialog.Filter = "Application (*.exe)|*.exe";
-                if (fileDialog.ShowDialog() == DialogResult.OK)
+                fileDialog.Title = "Select a application";
+                fileDialog.DereferenceLinks = true;
+                fileDialog.Multiselect = false;
+                DialogResult result = fileDialog.ShowDialog();
+                if (result == DialogResult.OK || result == DialogResult.Yes)
                 {
                     path = fileDialog.FileName;
 
                     Task.Factory.StartNew(() =>
                     {
-                        using (LogonUser(domain, username, password, LogonType.Service))
-                        {
-                            UACHelper.UACHelper.StartElevated(new ProcessStartInfo(path));
-                        }
+                        UACHelper.UACHelper.StartElevated(new ProcessStartInfo(path));
+
+                        //Process p = new Process();
+
+                        //ProcessStartInfo ps = new ProcessStartInfo();
+
+                        //ps.FileName = path;
+                        //ps.Domain = domain;
+                        //ps.UserName = username;
+                        //ps.Password = GetSecureString(password);
+                        //ps.LoadUserProfile = true;
+                        //ps.CreateNoWindow = true;
+                        //ps.UseShellExecute = false;
+
+                        //p.StartInfo = ps;
+                        //p.Start();
                     });
                 }
                 else
@@ -217,10 +260,50 @@ namespace RunAs
 
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                ControlStateSwitch(false, true, true, true, true, true);
             }
         }
+
+
+        #region Added CtrlBackspaceSupport to textbox with password char 
+        private void textBoxPassword_KeyDown(object sender, KeyEventArgs e)
+        {
+            TextBox box = (TextBox)sender;
+            if (e.KeyData == (Keys.Back | Keys.Control))
+            {
+                if (!box.ReadOnly && box.SelectionLength == 0)
+                {
+                    RemoveWord(box);
+                }
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        private void RemoveWord(TextBox box)
+        {
+            string text = Regex.Replace(box.Text.Substring(0, box.SelectionStart), @"(^\W)?\w*\W*$", "");
+            box.Text = text + box.Text.Substring(box.SelectionStart);
+            box.SelectionStart = text.Length;
+        }
+        #endregion
+
+        #region Controle state
+        private void ControlStateSwitch(bool Use_Wait_Cursor_State,bool Button_Start_State, bool Button_RestartWithAdminRights_State, bool ComboBox_Domain_State, bool ComboBox_Username_State, bool TextBox_Password_State)
+        {
+            this.UseWaitCursor = Use_Wait_Cursor_State;
+            buttonStart.Enabled = Button_Start_State;
+            buttonRestartWithAdminRights.Enabled = Button_RestartWithAdminRights_State;
+            comboBoxDomain.Enabled = ComboBox_Domain_State;
+            comboBoxUsername.Enabled = ComboBox_Username_State;
+            textBoxPassword.Enabled = TextBox_Password_State;
+            this.Refresh();
+        }
+        #endregion
     }
 }
