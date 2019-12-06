@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
+using Onova;
+using Onova.Services;
 using SimpleImpersonation;
 using System;
 using System.Collections.Generic;
@@ -294,7 +296,7 @@ namespace RunAs
         #endregion
 
         #region Controle state
-        private void ControlStateSwitch(bool Use_Wait_Cursor_State,bool Button_Start_State, bool Button_RestartWithAdminRights_State, bool ComboBox_Domain_State, bool ComboBox_Username_State, bool TextBox_Password_State)
+        private void ControlStateSwitch(bool Use_Wait_Cursor_State, bool Button_Start_State, bool Button_RestartWithAdminRights_State, bool ComboBox_Domain_State, bool ComboBox_Username_State, bool TextBox_Password_State)
         {
             this.UseWaitCursor = Use_Wait_Cursor_State;
             buttonStart.Enabled = Button_Start_State;
@@ -305,5 +307,37 @@ namespace RunAs
             this.Refresh();
         }
         #endregion
+
+        private async void frmMain_Shown(object sender, EventArgs e)
+        {
+            string user = "Hendrik-Koelbel";
+            string project = "RunAsAdmin";
+            string assetName = "RunAs.zip";
+            try
+            {
+                // Configure to look for packages in specified directory and treat them as zips
+                using (var manager = new UpdateManager(new GithubPackageResolver(user, project, assetName),new ZipPackageExtractor()))
+                {
+                    // Check for updates
+                    var result = await manager.CheckForUpdatesAsync();
+                    if (result.CanUpdate)
+                    {
+                        // Prepare an update by downloading and extracting the package
+                        // (supports progress reporting and cancellation)
+                        await manager.PrepareUpdateAsync(result.LastVersion);
+
+                        // Launch an executable that will apply the update
+                        // (can be instructed to restart the application afterwards)
+                        manager.LaunchUpdater(result.LastVersion);
+
+                        // Terminate the running application so that the updater can overwrite files
+                        Environment.Exit(0);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
     }
 }
