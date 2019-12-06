@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static RunAs.Helper;
@@ -317,7 +318,7 @@ namespace RunAs
             try
             {
                 // Configure to look for packages in specified directory and treat them as zips
-                using (var manager = new UpdateManager(new GithubPackageResolver(user, project, assetName),new ZipPackageExtractor()))
+                using (var manager = new UpdateManager(new GithubPackageResolver(user, project, assetName), new ZipPackageExtractor()))
                 {
                     // Check for updates
                     var result = await manager.CheckForUpdatesAsync();
@@ -326,16 +327,9 @@ namespace RunAs
                         DialogResult dialog = MessageBox.Show(String.Format("A new version is available.\nold version: {0}\nnew version: {1}\nDo you want to update the version?", Assembly.GetExecutingAssembly().GetName().Version, result.LastVersion), "New update available", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
                         if (dialog == DialogResult.Yes)
                         {
-                            // Prepare an update by downloading and extracting the package
-                            // (supports progress reporting and cancellation)
-                            await manager.PrepareUpdateAsync(result.LastVersion);
 
-                            // Launch an executable that will apply the update
-                            // (can be instructed to restart the application afterwards)
-                            manager.LaunchUpdater(result.LastVersion);
-
-                            // Terminate the running application so that the updater can overwrite files
-                            Environment.Exit(0);
+                            frmUpdateProgress frmUpdateProgress = new frmUpdateProgress(manager);
+                            frmUpdateProgress.ShowDialog();
                         }
                         else
                         {
@@ -344,8 +338,9 @@ namespace RunAs
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                MessageBox.Show(ex.Message, ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
