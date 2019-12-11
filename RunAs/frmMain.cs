@@ -46,34 +46,6 @@ namespace RunAs
                     WindowsIdentity.GetCurrent().Name ?? "SYSTEM",
                     UACHelper.UACHelper.DesktopOwner.ToString());
 
-            SetDataSource(comboBoxDomain, GetAllDomains().ToArray());
-            SetDataSource(comboBoxUsername, GetAllUsers().ToArray());
-
-            Placeholder(comboBoxDomain, "Domain");
-            Placeholder(comboBoxUsername, "Username");
-            Placeholder(textBoxPassword, "Password");
-            buttonStart.Focus();
-
-            if (File.Exists(credentialsPath))
-            {
-                try
-                {
-                    JObject getCredentials = JObject.Parse(File.ReadAllText(credentialsPath));
-                    comboBoxDomain.Text = getCredentials.SelectToken("domain").ToString();
-                    comboBoxUsername.Text = getCredentials.SelectToken("username").ToString();
-                    textBoxPassword.Text = ss.Decrypt(getCredentials.SelectToken("password").ToString());
-                }
-                catch (Exception)
-                {
-                    comboBoxDomain.Text = String.Empty;
-                    comboBoxUsername.Text = String.Empty;
-                    textBoxPassword.Text = String.Empty;
-                    if (File.Exists(credentialsPath))
-                    {
-                        File.Delete(credentialsPath);
-                    }
-                }
-            }
             //if (UACHelper.UACHelper.IsAdministrator)
             //{
             //    buttonStart.Enabled = false;
@@ -334,6 +306,34 @@ namespace RunAs
                         else
                         {
 
+                        }
+                    }
+                }
+
+                SetDataSource(comboBoxDomain, GetAllDomains().ToArray());
+                SetDataSource(comboBoxUsername, GetAllUsers().ToArray());
+                Placeholder(comboBoxDomain, "Domain");
+                Placeholder(comboBoxUsername, "Username");
+                Placeholder(textBoxPassword, "Password");
+                buttonStart.Focus();
+
+                if (File.Exists(credentialsPath))
+                {
+                    try
+                    {
+                        JObject getCredentials = JObject.Parse(File.ReadAllText(credentialsPath));
+                        comboBoxDomain.Text = getCredentials.SelectToken("domain").ToString();
+                        comboBoxUsername.Text = getCredentials.SelectToken("username").ToString();
+                        textBoxPassword.Text = ss.Decrypt(getCredentials.SelectToken("password").ToString());
+                    }
+                    catch (Exception)
+                    {
+                        comboBoxDomain.Text = String.Empty;
+                        comboBoxUsername.Text = String.Empty;
+                        textBoxPassword.Text = String.Empty;
+                        if (File.Exists(credentialsPath))
+                        {
+                            File.Delete(credentialsPath);
                         }
                     }
                 }

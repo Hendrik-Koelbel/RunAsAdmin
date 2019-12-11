@@ -85,6 +85,12 @@
     <Compile Include="frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmProgressDialogOnly.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmProgressDialogOnly.Designer.cs">
+      <DependentUpon>frmProgressDialogOnly.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmUpdateProgress.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -99,6 +105,9 @@
     <Compile Include="SimpleSecurity.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmProgressDialogOnly.resx">
+      <DependentUpon>frmProgressDialogOnly.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmUpdateProgress.resx">
       <DependentUpon>frmUpdateProgress.cs</DependentUpon>

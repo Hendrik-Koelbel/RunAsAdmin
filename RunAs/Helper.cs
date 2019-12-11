@@ -13,6 +13,7 @@ using System.Security;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace RunAs
@@ -42,12 +43,10 @@ namespace RunAs
                 }
                 else
                 {
-                    return;
                 }
             }
             catch (Exception)
             {
-                return;
             }
         }
         #endregion
@@ -58,9 +57,9 @@ namespace RunAs
             var domainList = new List<string>();
             try
             {
+                domainList.Add(Environment.MachineName);
                 using (var forest = Forest.GetCurrentForest())
                 {
-                    domainList.Add(Environment.MachineName);
                     foreach (Domain domain in forest.Domains)
                     {
                         domainList.Add(domain.Name);
@@ -69,7 +68,7 @@ namespace RunAs
                     return domainList;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return domainList;
             }
@@ -185,10 +184,6 @@ namespace RunAs
                                 {
                                     DirectoryEntry de = result.GetUnderlyingObject() as DirectoryEntry;
                                     ADUsers.Add(de.Properties["samAccountName"].Value.ToString());
-                                    //Console.WriteLine("First Name: " + de.Properties["givenName"].Value);
-                                    //Console.WriteLine("Last Name : " + de.Properties["sn"].Value);
-                                    //Console.WriteLine("SAM account name   : " + de.Properties["samAccountName"].Value);
-                                    //Console.WriteLine("User principal name: " + de.Properties["userPrincipalName"].Value);
                                 }
                             }
                         }
