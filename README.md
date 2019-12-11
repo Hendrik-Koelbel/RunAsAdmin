@@ -24,7 +24,7 @@ For the versions available, see the [tags on this repository](https://github.com
 * **Hendrik Koelbel** - *Initial work* - [Hendrik-Koelbel](https://github.com/Hendrik-Koelbel)
 * **HenkLab** - *Collaboration* - [HenkLab](https://github.com/HenkLab)
 
-See also the list of [contributors](https://github.com/Hendrik-Koelbel/RunAsAdmin/Contributors) who participated in this project.
+See also the list of [contributors](https://github.com/Hendrik-Koelbel/RunAsAdmin/contributors) who participated in this project.
 
 ## License
 
