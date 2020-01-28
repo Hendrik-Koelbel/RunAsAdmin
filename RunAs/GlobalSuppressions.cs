@@ -7,3 +7,4 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Codequalität", "IDE0052:Ungelesene private Member entfernen", Justification = "<Ausstehend>", Scope = "member", Target = "~F:RunAs.frmMain.newUser")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1401:P/Invokes should not be visible", Justification = "<Ausstehend>", Scope = "member", Target = "~M:RunAs.Helper.SetForegroundWindow(System.Int32)~System.Int32")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1063:Implement IDisposable Correctly", Justification = "<Ausstehend>", Scope = "type", Target = "~T:RunAs.Impersonator")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Stil", "IDE0044:Modifizierer \"readonly\" hinzufügen", Justification = "<Ausstehend>", Scope = "member", Target = "~F:RunAs.frmUpdateProgress.cts")]

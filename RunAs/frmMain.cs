@@ -202,9 +202,9 @@ namespace RunAs
                 ///https://support.microsoft.com/en-us/help/3035277/mapped-drives-are-not-available-from-an-elevated-prompt-when-uac-is-co#detail%20to%20configure%20the%20registry%20entry
                 ///https://stackoverflow.com/a/25908932/11189474
                 OpenFileDialog fileDialog = new OpenFileDialog();
-                fileDialog.Filter = "Application (*.exe)|*.exe";
+                fileDialog.Filter = "Application (*.exe)|*.exe";// "All Files|*.*|Link (*.lnk)|*.lnk"
                 fileDialog.Title = "Select a application";
-                fileDialog.DereferenceLinks = true;
+                fileDialog.DereferenceLinks = false;
                 fileDialog.Multiselect = true;
                 DialogResult result = fileDialog.ShowDialog();
                 if (result == DialogResult.OK || result == DialogResult.Yes)
@@ -230,6 +230,7 @@ namespace RunAs
                         //p.StartInfo = ps;
                         //p.Start();
                     });
+
                 }
                 else
                 {

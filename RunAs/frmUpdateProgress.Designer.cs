@@ -39,10 +39,10 @@
             // 
             this.progressBarUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanelMain.SetColumnSpan(this.progressBarUpdate, 2);
-            this.progressBarUpdate.Location = new System.Drawing.Point(3, 22);
+            this.progressBarUpdate.Location = new System.Drawing.Point(3, 12);
             this.progressBarUpdate.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.progressBarUpdate.Name = "progressBarUpdate";
-            this.progressBarUpdate.Size = new System.Drawing.Size(420, 30);
+            this.progressBarUpdate.Size = new System.Drawing.Size(359, 30);
             this.progressBarUpdate.Step = 1;
             this.progressBarUpdate.TabIndex = 0;
             // 
@@ -52,9 +52,9 @@
             this.buttonCancel.AutoSize = true;
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.buttonCancel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonCancel.Location = new System.Drawing.Point(242, 92);
+            this.buttonCancel.Location = new System.Drawing.Point(211, 67);
             this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(154, 40);
+            this.buttonCancel.Size = new System.Drawing.Size(124, 31);
             this.buttonCancel.TabIndex = 1;
             this.buttonCancel.Text = "Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
@@ -74,7 +74,7 @@
             this.tableLayoutPanelMain.RowCount = 2;
             this.tableLayoutPanelMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanelMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanelMain.Size = new System.Drawing.Size(426, 150);
+            this.tableLayoutPanelMain.Size = new System.Drawing.Size(365, 111);
             this.tableLayoutPanelMain.TabIndex = 2;
             // 
             // labelPercentage
@@ -82,9 +82,9 @@
             this.labelPercentage.AutoSize = true;
             this.labelPercentage.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelPercentage.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPercentage.Location = new System.Drawing.Point(3, 75);
+            this.labelPercentage.Location = new System.Drawing.Point(3, 55);
             this.labelPercentage.Name = "labelPercentage";
-            this.labelPercentage.Size = new System.Drawing.Size(207, 75);
+            this.labelPercentage.Size = new System.Drawing.Size(176, 56);
             this.labelPercentage.TabIndex = 2;
             this.labelPercentage.Text = "labelPercentage";
             this.labelPercentage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -94,7 +94,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(426, 150);
+            this.ClientSize = new System.Drawing.Size(365, 111);
             this.ControlBox = false;
             this.Controls.Add(this.tableLayoutPanelMain);
             this.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));

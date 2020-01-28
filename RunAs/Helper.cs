@@ -68,7 +68,7 @@ namespace RunAs
                     return domainList;
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 return domainList;
             }

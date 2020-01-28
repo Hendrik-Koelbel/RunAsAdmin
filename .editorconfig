@@ -1,0 +1,7 @@
+﻿[*.{cs,vb}]
+
+# IDE0040: Zugriffsmodifizierer hinzufügen
+dotnet_style_require_accessibility_modifiers = never:silent
+
+# CA2213: Disposable fields should be disposed
+dotnet_diagnostic.CA2213.severity = none
