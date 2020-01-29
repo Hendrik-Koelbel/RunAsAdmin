@@ -209,6 +209,7 @@ namespace RunAs
                 DialogResult result = fileDialog.ShowDialog();
                 if (result == DialogResult.OK || result == DialogResult.Yes)
                 {
+
                     path = fileDialog.FileName;
 
                     Task.Factory.StartNew(() =>
