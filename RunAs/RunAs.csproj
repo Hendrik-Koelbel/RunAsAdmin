@@ -152,6 +152,11 @@
   <PropertyGroup>
     <PostBuildEvent>del "$(ProjectDir)bin\Release\*.xml", "$(TargetDir)*.pdb"
 del "$(ProjectDir)bin\Release\*.exe.config"
-del "$(ProjectDir)bin\Release\*.dll.config"</PostBuildEvent>
+del "$(ProjectDir)bin\Release\*.dll.config"
+if $(ConfigurationName) == Release copy /Y "$(TargetPath)" "$(SolutionDir)$(SolutionName)$(TargetExt)"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
 </Project>
