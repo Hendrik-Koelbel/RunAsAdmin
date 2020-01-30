@@ -108,7 +108,7 @@ namespace RunAs
                     using (StreamReader sr = new StreamReader(stream))
                     {
                         // seek to the current file position
-                        sr.BaseStream.Seek(_currentSize, SeekOrigin.Begin);
+                        //sr.BaseStream.Seek(_currentSize, SeekOrigin.Begin);
 
                         // read from current position to the end of the file
                         var newData = _buffer + sr.ReadToEnd();

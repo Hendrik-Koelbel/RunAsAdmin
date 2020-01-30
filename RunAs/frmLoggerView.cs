@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace RunAs
 {
@@ -10,6 +11,10 @@ namespace RunAs
         public frmLoggerView(string path)
         {
             InitializeComponent();
+
+            //var headerCokumns = new List<string>() { "Time", "Level", "Details" };
+            //headerCokumns.ForEach(name => listViewLog.Columns.Add(name));
+
             Path = path;
 
             Monitor = new LogFileMonitor(Path, "\r\n");
@@ -17,7 +22,8 @@ namespace RunAs
             Monitor.OnLine += (s, ex) =>
             {
                 // WARNING.. this will be a different thread...
-                listBoxLog.Items.Add(ex.Line);
+
+                listViewLog.Items.Add(ex.Line);
             };
             Monitor.Start();
         }
