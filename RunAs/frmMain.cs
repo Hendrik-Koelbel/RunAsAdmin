@@ -193,7 +193,6 @@ namespace RunAs
 
                 }
                 Log.Error(nullex, string.Join(", ", emptyControlsResult));
-                File.AppendAllText(Path.GetTempPath() + @"\RunAs\log-20200130.log", "Test");
                 MessageBox.Show(String.Format("{0}\n\n{1}", nullex.Message, string.Join("\n", emptyControlsResult)), nullex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Win32Exception win32ex)
@@ -269,7 +268,7 @@ namespace RunAs
             }
             catch (Exception ex)
             {
-                Log.Debug(ex, ex.Message, ex.StackTrace);
+                Log.Debug(ex, ex.Message);
                 MessageBox.Show(ex.Message);
             }
             finally
@@ -382,6 +381,30 @@ namespace RunAs
             {
                 MessageBox.Show(ex.Message, ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void showLogViewerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                DateTime dateTime = DateTime.Now;
+                frmLoggerView logview = new frmLoggerView(Path.GetTempPath() + @"RunAs\log-"+ dateTime.ToString("yyyyMMdd") +".log");
+                logview.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void comboBoxDomain_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Log.Information("Combobox value changed to " + comboBoxDomain.GetItemText(this.comboBoxDomain.SelectedItem));
+        }
+
+        private void comboBoxUsername_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Log.Information("Combobox value changed to " + comboBoxUsername.GetItemText(this.comboBoxUsername.SelectedItem));
         }
     }
 }

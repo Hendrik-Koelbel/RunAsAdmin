@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.buttonStart = new System.Windows.Forms.Button();
             this.buttonRestartWithAdminRights = new System.Windows.Forms.Button();
             this.labelCurrentUser = new System.Windows.Forms.Label();
@@ -38,7 +39,10 @@
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.comboBoxDomain = new System.Windows.Forms.ComboBox();
             this.comboBoxUsername = new System.Windows.Forms.ComboBox();
+            this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.showLogViewerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel.SuspendLayout();
+            this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonStart
@@ -172,6 +176,7 @@
             this.comboBoxDomain.Name = "comboBoxDomain";
             this.comboBoxDomain.Size = new System.Drawing.Size(278, 25);
             this.comboBoxDomain.TabIndex = 1;
+            this.comboBoxDomain.SelectedIndexChanged += new System.EventHandler(this.comboBoxDomain_SelectedIndexChanged);
             // 
             // comboBoxUsername
             // 
@@ -184,6 +189,21 @@
             this.comboBoxUsername.Name = "comboBoxUsername";
             this.comboBoxUsername.Size = new System.Drawing.Size(278, 25);
             this.comboBoxUsername.TabIndex = 2;
+            this.comboBoxUsername.SelectedIndexChanged += new System.EventHandler(this.comboBoxUsername_SelectedIndexChanged);
+            // 
+            // contextMenuStrip
+            // 
+            this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showLogViewerToolStripMenuItem});
+            this.contextMenuStrip.Name = "contextMenuStrip";
+            this.contextMenuStrip.Size = new System.Drawing.Size(162, 26);
+            // 
+            // showLogViewerToolStripMenuItem
+            // 
+            this.showLogViewerToolStripMenuItem.Name = "showLogViewerToolStripMenuItem";
+            this.showLogViewerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.showLogViewerToolStripMenuItem.Text = "Show LogViewer";
+            this.showLogViewerToolStripMenuItem.Click += new System.EventHandler(this.showLogViewerToolStripMenuItem_Click);
             // 
             // frmMain
             // 
@@ -192,6 +212,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(448, 218);
+            this.ContextMenuStrip = this.contextMenuStrip;
             this.Controls.Add(this.tableLayoutPanel);
             this.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(8, 9, 8, 9);
@@ -204,6 +225,7 @@
             this.Shown += new System.EventHandler(this.frmMain_Shown);
             this.tableLayoutPanel.ResumeLayout(false);
             this.tableLayoutPanel.PerformLayout();
+            this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -221,6 +243,8 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
         private System.Windows.Forms.ComboBox comboBoxDomain;
         private System.Windows.Forms.ComboBox comboBoxUsername;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem showLogViewerToolStripMenuItem;
     }
 }
 

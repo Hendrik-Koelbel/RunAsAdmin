@@ -28,33 +28,39 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.textBoxLog = new System.Windows.Forms.TextBox();
+            this.listBoxLog = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
             // 
-            // textBoxLog
+            // listBoxLog
             // 
-            this.textBoxLog.Location = new System.Drawing.Point(12, 12);
-            this.textBoxLog.Multiline = true;
-            this.textBoxLog.Name = "textBoxLog";
-            this.textBoxLog.Size = new System.Drawing.Size(637, 347);
-            this.textBoxLog.TabIndex = 0;
+            this.listBoxLog.FormattingEnabled = true;
+            this.listBoxLog.Location = new System.Drawing.Point(12, 12);
+            this.listBoxLog.Name = "listBoxLog";
+            this.listBoxLog.Size = new System.Drawing.Size(609, 329);
+            this.listBoxLog.TabIndex = 0;
             // 
             // frmLoggerView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(661, 371);
-            this.Controls.Add(this.textBoxLog);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.AutoScroll = true;
+            this.ClientSize = new System.Drawing.Size(633, 359);
+            this.Controls.Add(this.listBoxLog);
+            this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "frmLoggerView";
-            this.Text = "frmProgressDialogOnly";
+            this.Opacity = 0.95D;
+            this.ShowIcon = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Log Viewer";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmLoggerView_FormClosed);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.TextBox textBoxLog;
+        private System.Windows.Forms.ListBox listBoxLog;
     }
 }
