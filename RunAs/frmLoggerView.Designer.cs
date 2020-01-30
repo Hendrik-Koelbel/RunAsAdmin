@@ -28,19 +28,33 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.textBoxLog = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
-            // frmProgressDialogOnly
+            // textBoxLog
+            // 
+            this.textBoxLog.Location = new System.Drawing.Point(12, 12);
+            this.textBoxLog.Multiline = true;
+            this.textBoxLog.Name = "textBoxLog";
+            this.textBoxLog.Size = new System.Drawing.Size(637, 347);
+            this.textBoxLog.TabIndex = 0;
+            // 
+            // frmLoggerView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(678, 332);
-            this.Name = "frmProgressDialogOnly";
+            this.ClientSize = new System.Drawing.Size(661, 371);
+            this.Controls.Add(this.textBoxLog);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Name = "frmLoggerView";
             this.Text = "frmProgressDialogOnly";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
+
+        private System.Windows.Forms.TextBox textBoxLog;
     }
 }

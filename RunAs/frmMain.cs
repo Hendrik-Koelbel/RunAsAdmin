@@ -12,7 +12,6 @@ using System.Reflection;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static RunAs.Helper;
@@ -21,6 +20,10 @@ namespace RunAs
 {
     public partial class frmMain : Form
     {
+        //Create own Sink with ILogEventSink and log to a Textbox/view
+        //https://stackoverflow.com/a/57186882/11189474
+
+
         SimpleSecurity ss = new SimpleSecurity();
         //Examples 
         //SimpleSecurity ss = new SimpleSecurity();
@@ -43,7 +46,7 @@ namespace RunAs
 
             Log.Information("Add version to the tilebar text");
 
-            var infoText = String.Format("Current user: {0} " +
+            labelCurrentUser.Text = String.Format("Current user: {0} " +
                     "\nDefault Behavior: {1} " +
                     "\nIs Elevated: {2}" +
                     "\nIs Administrator: {3}" +
@@ -57,9 +60,8 @@ namespace RunAs
                     UACHelper.UACHelper.IsDesktopOwner.ToString(),
                     WindowsIdentity.GetCurrent().Name ?? "SYSTEM",
                     UACHelper.UACHelper.DesktopOwner.ToString());
-            labelCurrentUser.Text = infoText;
             
-            Log.Information("Added text to the information label", infoText);
+            Log.Information("Added text to the information label");
 
             //if (UACHelper.UACHelper.IsAdministrator)
             //{
@@ -322,7 +324,7 @@ namespace RunAs
 
         private async void frmMain_Shown(object sender, EventArgs e)
         {
-            Log.Information("");
+            Log.Information("Form shown");
             string user = "Hendrik-Koelbel";
             string project = "RunAsAdmin";
             string assetName = "RunAs.zip";
@@ -338,7 +340,6 @@ namespace RunAs
                         DialogResult dialog = MessageBox.Show(String.Format("A new version is available.\nold version: {0}\nnew version: {1}\nDo you want to update the version?", Assembly.GetExecutingAssembly().GetName().Version, result.LastVersion), "New update available", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
                         if (dialog == DialogResult.Yes)
                         {
-
                             frmUpdateProgress frmUpdateProgress = new frmUpdateProgress(manager);
                             frmUpdateProgress.ShowDialog();
                         }

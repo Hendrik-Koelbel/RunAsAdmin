@@ -69,9 +69,9 @@ namespace RunAs
         public void ReportProgress(double value)
         {
             //Update the UI to reflect the progress value that is passed back.
-            this.progressBarUpdate.Increment(Convert.ToInt32(value * 100));
-            this.labelPercentage.Text = String.Format("{0}%/100%" ,Convert.ToInt32(value * 100));
             Log.Information("Update progress: {0}%/100%", Convert.ToInt32(value * 100));
+            this.progressBarUpdate.Increment(Convert.ToInt32(value * 100));
+            this.labelPercentage.Text = String.Format("{0}%/100%", Convert.ToInt32(value * 100));
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
