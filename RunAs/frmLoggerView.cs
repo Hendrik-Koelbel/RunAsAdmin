@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace RunAs
 {
-    public partial class frmProgressDialogOnly : Form
+    public partial class frmLoggerView : Form
     {
-        public frmProgressDialogOnly()
+        public frmLoggerView()
         {
             InitializeComponent();
         }

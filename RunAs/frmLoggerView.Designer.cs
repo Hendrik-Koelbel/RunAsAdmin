@@ -1,6 +1,6 @@
 ﻿namespace RunAs
 {
-    partial class frmProgressDialogOnly
+    partial class frmLoggerView
     {
         /// <summary>
         /// Required designer variable.

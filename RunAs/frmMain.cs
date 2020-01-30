@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using Onova;
 using Onova.Services;
+using Serilog;
 using SimpleImpersonation;
 using System;
 using System.Collections.Generic;
@@ -30,8 +31,19 @@ namespace RunAs
         public frmMain()
         {
             InitializeComponent();
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Async(a => a.RollingFile(Path.GetTempPath() + @"\RunAs\log-{Date}.log",
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] {Message}{NewLine}{Exception}", shared: true, retainedFileCountLimit: 7))
+                .CreateLogger();
+
+            Log.Information("Program initialized");
+            
             this.Text = this.Text + " - " + Assembly.GetExecutingAssembly().GetName().Version;
-            labelCurrentUser.Text = String.Format("Current user: {0} " +
+
+            Log.Information("Add version to the tilebar text");
+
+            var infoText = String.Format("Current user: {0} " +
                     "\nDefault Behavior: {1} " +
                     "\nIs Elevated: {2}" +
                     "\nIs Administrator: {3}" +
@@ -45,6 +57,9 @@ namespace RunAs
                     UACHelper.UACHelper.IsDesktopOwner.ToString(),
                     WindowsIdentity.GetCurrent().Name ?? "SYSTEM",
                     UACHelper.UACHelper.DesktopOwner.ToString());
+            labelCurrentUser.Text = infoText;
+            
+            Log.Information("Added text to the information label", infoText);
 
             //if (UACHelper.UACHelper.IsAdministrator)
             //{
@@ -54,12 +69,18 @@ namespace RunAs
             //    textBoxPassword.Enabled = false;
             //    buttonRestartWithAdminRights.Enabled = true;
             //}
+
+            Log.Information("Check if user is administrator");
+            
             if (!UACHelper.UACHelper.IsAdministrator)
             {
                 buttonRestartWithAdminRights.Enabled = false;
+                Log.Information("Disable 'start with admin rights button'");
                 UACHelper.WinForm.ShieldifyButton(buttonRestartWithAdminRights);
+                Log.Information("Add shield to 'start with admin rights button'");
             }
-
+            
+            Log.Information("Set form in foreground");
             SetForegroundWindow(Handle.ToInt32());
 
         }
@@ -77,8 +98,11 @@ namespace RunAs
         {
             try
             {
+                Log.Information("Button 'Restart' clicked");
+
                 ControlStateSwitch(true, false, buttonRestartWithAdminRights.Enabled, false, false, false);
 
+                Log.Information("Check if {0}, {1} and {2} is null or empty", comboBoxDomain.Name, comboBoxUsername.Name, textBoxPassword.Name);
                 if (String.IsNullOrWhiteSpace(comboBoxDomain.Text) || String.IsNullOrWhiteSpace(comboBoxUsername.Text) || String.IsNullOrWhiteSpace(textBoxPassword.Text))
                 {
                     throw new ArgumentNullException();
@@ -166,10 +190,13 @@ namespace RunAs
                     }
 
                 }
+                Log.Error(nullex, string.Join(", ", emptyControlsResult));
+                File.AppendAllText(Path.GetTempPath() + @"\RunAs\log-20200130.log", "Test");
                 MessageBox.Show(String.Format("{0}\n\n{1}", nullex.Message, string.Join("\n", emptyControlsResult)), nullex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Win32Exception win32ex)
             {
+                Log.Error(win32ex, win32ex.Message);
                 MessageBox.Show(win32ex.Message + " Code: " + win32ex.NativeErrorCode, win32ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
@@ -188,10 +215,12 @@ namespace RunAs
             {
                 ControlStateSwitch(true, false, false, false, false, false);
 
+                Log.Information("Create a JSON Object for the login informations");
                 JObject getCredentials = JObject.Parse(File.ReadAllText(credentialsPath));
                 domain = getCredentials.SelectToken("domain").ToString();
                 username = getCredentials.SelectToken("username").ToString();
                 password = ss.Decrypt(getCredentials.SelectToken("password").ToString());
+                Log.Information("JSON Object: ", getCredentials);
 
                 string path = string.Empty;
 
@@ -238,6 +267,7 @@ namespace RunAs
             }
             catch (Exception ex)
             {
+                Log.Debug(ex, ex.Message, ex.StackTrace);
                 MessageBox.Show(ex.Message);
             }
             finally
@@ -272,18 +302,27 @@ namespace RunAs
         #region Controle state
         private void ControlStateSwitch(bool Use_Wait_Cursor_State, bool Button_Start_State, bool Button_RestartWithAdminRights_State, bool ComboBox_Domain_State, bool ComboBox_Username_State, bool TextBox_Password_State)
         {
+            Log.Information("Control state switch executed");
             this.UseWaitCursor = Use_Wait_Cursor_State;
+            Log.Information("Use wait cursor: " + Use_Wait_Cursor_State);
             buttonStart.Enabled = Button_Start_State;
+            Log.Information("Button start with admin rights state: " + Button_Start_State);
             buttonRestartWithAdminRights.Enabled = Button_RestartWithAdminRights_State;
+            Log.Information("Button restart state: " + Button_RestartWithAdminRights_State);
             comboBoxDomain.Enabled = ComboBox_Domain_State;
+            Log.Information("Combobox domain state: " + ComboBox_Domain_State);
             comboBoxUsername.Enabled = ComboBox_Username_State;
+            Log.Information("Combobox username state: " + ComboBox_Username_State);
             textBoxPassword.Enabled = TextBox_Password_State;
+            Log.Information("Textbox password: " + TextBox_Password_State);
             this.Refresh();
+            Log.Information("Application refresh executed");
         }
         #endregion
 
         private async void frmMain_Shown(object sender, EventArgs e)
         {
+            Log.Information("");
             string user = "Hendrik-Koelbel";
             string project = "RunAsAdmin";
             string assetName = "RunAs.zip";
