@@ -3,7 +3,7 @@
 RunAsAdmin is a small project for administrators to save data locally in the PC after a single input and to use it again at the next restart.
 
 ## Getting Started
-You can easily download and run the program [here](https://github.com/Hendrik-Koelbel/RunAsAdmin/releases/latest)
+You can easily download and run the program [here](https://github.com/HendrikKoelbel/RunAsAdmin/releases/latest)
 
 ### Prerequisites
 
@@ -17,14 +17,14 @@ You can easily download and run the program [here](https://github.com/Hendrik-Ko
 
 ## Versioning
 
-For the versions available, see the [tags on this repository](https://github.com/Hendrik-Koelbel/RunAsAdmin/Tags). 
+For the versions available, see the [tags on this repository](https://github.com/HendrikKoelbel/RunAsAdmin/Tags). 
 
 ## Authors
 
-* **Hendrik Koelbel** - *Initial work* - [Hendrik-Koelbel](https://github.com/Hendrik-Koelbel)
+* **Hendrik Koelbel** - *Initial work* - [HendrikKoelbel](https://github.com/HendrikKoelbel)
 * **HenkLab** - *Collaboration* - [HenkLab](https://github.com/HenkLab)
 
-See also the list of [contributors](https://github.com/Hendrik-Koelbel/RunAsAdmin/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/HendrikKoelbel/RunAsAdmin/contributors) who participated in this project.
 
 ## License
 
