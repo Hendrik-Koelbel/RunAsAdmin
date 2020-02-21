@@ -324,7 +324,7 @@ namespace RunAs
         private async void frmMain_Shown(object sender, EventArgs e)
         {
             Log.Information("Form shown");
-            string user = "Hendrik-Koelbel";
+            string user = "HendrikKoelbel";
             string project = "RunAsAdmin";
             string assetName = "RunAs.zip";
             try
